@@ -41,16 +41,10 @@ class GuiEventLoop(BaseEventLoop):
         if isinstance(future, futures.Future):
             return future  # Don't wrap our own type of Future.
         new_future = futures.Future()
-# <<<<<<< 1a10a6570b002e5375d6209f3b11afdb69fcef0a
         future.add_done_callback(
             lambda future:
                 self.call_soon_threadsafe(
                     futures._copy_future_state, future, new_future))
-# =======
-        # future.add_done_callback(lambda future: 1)
-            # lambda future:
-                # self.call_soon_threadsafe(new_future._copy_state, future))
-# >>>>>>> silence error
         return new_future
 
     def run_until_complete(self, future, timeout=None):  # NEW!
