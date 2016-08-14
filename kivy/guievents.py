@@ -76,7 +76,7 @@ class GuiEventLoop(BaseEventLoop):
     def call_soon_threadsafe(self, callback, *args):
         return self.call_soon(callback, *args)
 
-    def run_in_executor(self, executor, callback, *args):
+    def run_in_executor(self, executor, callback, *args, **kwargs):
         if isinstance(callback, asyncio.Handle):
             assert not args
             assert not isinstance(callback, asyncio.TimerHandle)
@@ -90,7 +90,7 @@ class GuiEventLoop(BaseEventLoop):
             if executor is None:
                 executor = concurrent.futures.ThreadPoolExecutor(_MAX_WORKERS)
                 self._default_executor = executor
-        return self.wrap_future(executor.submit(callback, *args))
+        return self.wrap_future(executor.submit(callback, *args, **kwargs))
 
     def _io_helper(self, target, args, kwargs):
         lock = threading.Lock()
