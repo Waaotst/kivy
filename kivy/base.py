@@ -512,30 +512,48 @@ if not PY2:
             super().__init__()
             self.app = app
 
-        def mainloop(self):
+
+        def run(self):
+            """ Start the application """
             set_event_loop(self)
             try:
                 self.run_forever()
             finally:
                 set_event_loop(None)
 
-        def run(self):
-            self.app.run()
-
         def run_forever(self):
+            """Run the event loop until stop() is called."""
             self.run()
 
         def run_once(self, timeout=None):
+            """Run one complete cycle of the event loop."""
             if EventLoop.window and hasattr(EventLoop.window, '_mainloop'):
                 EventLoop.window._mainloop()
             else:
                 EventLoop.idle()
 
         def stop(self):
+            """Stop the event loop as soon as reasonable.
+            no more I/O callbacks should be scheduled.
+            """
             super().stop()
             self.app.stop()
 
         def call_later(self, delay, callback, *args):
+            ''' Arrange for the callback to be called after the given delay seconds
+                (either an int or float).
+
+            An instance of asyncio.Handle is returned,
+            which can be used to cancel the callback.
+
+            callback will be called exactly once per call to call_later().
+            If two callbacks are scheduled for exactly the same time,
+            it is undefined which will be called first.
+
+            The optional positional args will be passed to the callback when it
+            is called. If you want the callback to be called with some named
+            arguments, use a closure or functools.partial().
+            '''
             res = Clock.schedule_once(
                 lambda *_: callback(*args),
                 delay * 1000)
