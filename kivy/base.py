@@ -33,7 +33,7 @@ from kivy.context import register_context
 from kivy.compat import PY2
 
 if not PY2:
-    from asyncio import set_event_loop
+    import asyncio
     from kivy.guievents import GuiEventLoop
 
 # private vars
@@ -515,15 +515,15 @@ if not PY2:
 
         def run(self):
             """ Start the application """
-            set_event_loop(self)
+            asyncio.set_event_loop(self)
             try:
                 self.run_forever()
             finally:
-                set_event_loop(None)
+                asyncio.set_event_loop(None)
 
         def run_forever(self):
             """Run the event loop until stop() is called."""
-            self.run()
+            self.app.run()
 
         def run_once(self, timeout=None):
             """Run one complete cycle of the event loop."""
@@ -554,16 +554,17 @@ if not PY2:
             is called. If you want the callback to be called with some named
             arguments, use a closure or functools.partial().
             '''
-            res = Clock.schedule_once(
-                lambda *_: callback(*args),
-                delay * 1000)
+            handle = KivyHandle(callback, args, self)
+            res = Clock.schedule_once(lambda *_: callback(*args), delay * 1000)
+            handle.clock_id = res
+            return handle
 
-            return _CancelJob(self, res)
 
-    class _CancelJob(object):
-        def __init__(self, event_loop, after_id):
-            self.event_loop = event_loop
-            self.after_id = after_id
+    class KivyHandle(asyncio.Handle):
+        def __init__(self, callback, args, loop):
+            super().__init__(callback, args, loop)
+            self.clock_id = None
 
         def cancel(self):
-            Clock.unschedule(self.after_id)
+            Clock.unschedule(self.clock_id)
+            super().cancel()
