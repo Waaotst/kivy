@@ -914,7 +914,7 @@ if isdir(binary_deps_path):
 # -----------------------------------------------------------------------------
 # setup !
 setup(
-    name='Kivy',
+    name='uncrumpled_kivy',
     version=get_version(),
     author='Kivy Team and other contributors',
     author_email='kivy-dev@googlegroups.com',
